@@ -48,13 +48,13 @@ def main():
         meteors = []
         mission = Mission()
         
-        # Player 1 (Arrow keys, W to shoot)
-        p1_controls = {'left': pygame.K_LEFT, 'right': pygame.K_RIGHT, 'fire': pygame.K_w}
+        # Player 1 (A/D movement, W to shoot)
+        p1_controls = {'left': pygame.K_a, 'right': pygame.K_d, 'fire': pygame.K_w}
         ships.append(SpaceShip(SCREEN_WIDTH, SCREEN_HEIGHT, GREEN, SCREEN_WIDTH // 3, p1_controls))
         
         if game_mode == "MULTI":
-            # Player 2 (A/D keys, UP Arrow to shoot)
-            p2_controls = {'left': pygame.K_a, 'right': pygame.K_d, 'fire': pygame.K_UP}
+            # Player 2 (Arrows movement, UP Arrow to shoot)
+            p2_controls = {'left': pygame.K_LEFT, 'right': pygame.K_RIGHT, 'fire': pygame.K_UP}
             ships.append(SpaceShip(SCREEN_WIDTH, SCREEN_HEIGHT, BLUE, 2 * SCREEN_WIDTH // 3, p2_controls))
         else:
             ships[0].rect.centerx = SCREEN_WIDTH // 2
@@ -117,7 +117,7 @@ def main():
             draw_text(screen, "2. Two Players", 32, SCREEN_WIDTH // 2, 300)
             draw_text(screen, "Q. Quit", 32, SCREEN_WIDTH // 2, 350)
             
-            draw_text(screen, "P1: Arrows + W | P2: A/D + UP", 24, SCREEN_WIDTH // 2, 500)
+            draw_text(screen, "P1: A/D + W | P2: Arrows + UP", 24, SCREEN_WIDTH // 2, 500)
 
         elif state == GameState.PLAYING:
             active_ships = [s for s in ships if s.hull > 0]
