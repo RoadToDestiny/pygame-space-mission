@@ -48,12 +48,12 @@ def main():
         mission = Mission()
         
         # Player 1 (Arrow keys, Space to shoot)
-        p1_controls = {'left': pygame.K_LEFT, 'right': pygame.K_RIGHT, 'fire': pygame.K_SPACE}
+        p1_controls = {'left': pygame.K_LEFT, 'right': pygame.K_RIGHT, 'fire': pygame.K_UP}
         ships.append(SpaceShip(SCREEN_WIDTH, SCREEN_HEIGHT, GREEN, SCREEN_WIDTH // 3, p1_controls))
         
         if game_mode == "MULTI":
             # Player 2 (A/D keys, Left Shift to shoot)
-            p2_controls = {'left': pygame.K_a, 'right': pygame.K_d, 'fire': pygame.K_LSHIFT}
+            p2_controls = {'left': pygame.K_a, 'right': pygame.K_d, 'fire': pygame.K_w}
             ships.append(SpaceShip(SCREEN_WIDTH, SCREEN_HEIGHT, BLUE, 2 * SCREEN_WIDTH // 3, p2_controls))
         else:
             # Center the single ship
