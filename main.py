@@ -49,12 +49,12 @@ def main():
         mission = Mission()
         
         # Player 1 (Arrow keys, Space to shoot)
-        p1_controls = {'left': pygame.K_LEFT, 'right': pygame.K_RIGHT, 'fire': pygame.K_UP}
+        p1_controls = {'left': pygame.K_LEFT, 'right': pygame.K_RIGHT, 'fire': pygame.K_SPACE}
         ships.append(SpaceShip(SCREEN_WIDTH, SCREEN_HEIGHT, GREEN, SCREEN_WIDTH // 3, p1_controls))
         
         if game_mode == "MULTI":
             # Player 2 (A/D keys, Left Shift to shoot)
-            p2_controls = {'left': pygame.K_a, 'right': pygame.K_d, 'fire': pygame.K_w}
+            p2_controls = {'left': pygame.K_a, 'right': pygame.K_d, 'fire': pygame.K_LSHIFT}
             ships.append(SpaceShip(SCREEN_WIDTH, SCREEN_HEIGHT, BLUE, 2 * SCREEN_WIDTH // 3, p2_controls))
         else:
             ships[0].rect.centerx = SCREEN_WIDTH // 2
@@ -86,9 +86,14 @@ def main():
 
             elif state == GameState.PLAYING:
                 if event.type == pygame.KEYDOWN:
+                    # Escape to return to menu
+                    if event.key == pygame.K_ESCAPE:
+                        state = GameState.MENU
+                    
                     for ship in ships:
                         if ship.hull > 0 and event.key == ship.controls['fire']:
-                            bullets.append(Bullet(ship.rect.centerx, ship.rect.top))
+                            # Pass 'ship' as owner
+                            bullets.append(Bullet(ship.rect.centerx, ship.rect.top, ship))
                                 
             elif state == GameState.GAMEOVER:
                 if event.type == pygame.KEYDOWN:
@@ -142,21 +147,29 @@ def main():
                 if meteor.rect.top > SCREEN_HEIGHT:
                     meteors.remove(meteor)
                 
-                # Collisions
+                # Collisions Ship vs Meteor
                 for ship in active_ships:
                     if meteor.rect.colliderect(ship.rect):
                         ship.hull -= 20
                         if meteor in meteors: meteors.remove(meteor)
                 
+                # Collisions Bullet vs Meteor
                 for bullet in bullets[:]:
                     if meteor in meteors and bullet.rect.colliderect(meteor.rect):
                         bullets.remove(bullet)
                         meteors.remove(meteor)
                         mission.score += 10
+                        
+                        # Reward fuel to the shooter
+                        if bullet.owner and bullet.owner in ships:
+                            bullet.owner.fuel += 15
+                            if bullet.owner.fuel > 100:
+                                bullet.owner.fuel = 100
                         break
 
             # UI HUD
             draw_text(screen, f"Score: {mission.score}", 30, SCREEN_WIDTH // 2, 10)
+            draw_text(screen, "ESC: Menu", 20, SCREEN_WIDTH // 2, 40)
             
             # P1 Stats (Left)
             draw_text(screen, f"P1 Hull: {int(ships[0].hull)}%", 20, 70, 20)

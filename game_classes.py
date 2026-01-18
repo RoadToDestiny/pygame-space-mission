@@ -33,11 +33,11 @@ class SpaceShip:
             moved = False
             if keys_pressed[self.controls['left']] and self.rect.left > 0:
                 self.rect.x -= self.speed
-                self.fuel -= 0.1 # Consume fuel
+                self.fuel -= 0.1
                 moved = True
             if keys_pressed[self.controls['right']] and self.rect.right < self.screen_width:
                 self.rect.x += self.speed
-                self.fuel -= 0.1 # Consume fuel
+                self.fuel -= 0.1
                 moved = True
             
             # Ensure fuel doesn't go below 0
@@ -52,13 +52,14 @@ class SpaceShip:
             pygame.draw.rect(surface, (255, 165, 0), (self.rect.x, self.rect.y - 5, 50 * (self.fuel/100), 4))
 
 class Bullet:
-    def __init__(self, x, y):
+    def __init__(self, x, y, owner):
         self.image = pygame.Surface((5, 10))
         self.image.fill((255, 255, 0))
         self.rect = self.image.get_rect()
         self.rect.centerx = x
         self.rect.bottom = y
         self.speed = -7
+        self.owner = owner # Track which ship fired this bullet
 
     def update(self):
         self.rect.y += self.speed
