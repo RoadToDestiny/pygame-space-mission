@@ -9,35 +9,38 @@ class CrewMember:
         self.skills = {"piloting": 10, "engineering": 10}
 
 class SpaceShip:
-    def __init__(self, screen_width, screen_height):
+    def __init__(self, screen_width, screen_height, color, start_x, controls):
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.image = pygame.Surface((50, 40))
-        self.image.fill((0, 255, 0))  # Green ship
+        self.image.fill(color)
         self.rect = self.image.get_rect()
-        self.rect.centerx = screen_width // 2
+        self.rect.centerx = start_x
         self.rect.bottom = screen_height - 10
         self.speed = 5
+        self.controls = controls # Expected dict: {'left': K_LEFT, 'right': K_RIGHT, 'fire': K_SPACE}
+        self.color = color
         
-        # Simulator attributes from requirements
+        # Simulator attributes
         self.fuel = 100.0
         self.hull = 100.0
         self.current_speed = 0
         self.crew = [CrewMember("Alice", "Pilot"), CrewMember("Bob", "Engineer")]
 
-    def update(self, moving_left, moving_right):
-        if self.fuel > 0:
-            if moving_left and self.rect.left > 0:
+    def update(self, keys_pressed):
+        if self.fuel > 0 and self.hull > 0:
+            if keys_pressed[self.controls['left']] and self.rect.left > 0:
                 self.rect.x -= self.speed
                 self.fuel -= 0.05
-            if moving_right and self.rect.right < self.screen_width:
+            if keys_pressed[self.controls['right']] and self.rect.right < self.screen_width:
                 self.rect.x += self.speed
                 self.fuel -= 0.05
         
     def draw(self, surface):
-        pygame.draw.rect(surface, (0, 255, 0), self.rect)
-        # Draw basic HUD bar for hull/fuel above ship
-        pygame.draw.rect(surface, (255, 0, 0), (self.rect.x, self.rect.y - 10, 50 * (self.hull/100), 5))
+        if self.hull > 0:
+            pygame.draw.rect(surface, self.color, self.rect)
+            # Draw HUD bar for hull above ship
+            pygame.draw.rect(surface, (255, 0, 0), (self.rect.x, self.rect.y - 10, 50 * (self.hull/100), 5))
 
 class Bullet:
     def __init__(self, x, y):
