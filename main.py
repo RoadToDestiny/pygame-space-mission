@@ -4,8 +4,6 @@ import random
 from game_classes import SpaceShip, Bullet, Meteor, Mission
 
 # Constants
-# We will set these dynamically in main() based on fullscreen resolution
-# Default fallback
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 FPS = 60
@@ -30,19 +28,23 @@ def draw_text(surface, text, size, x, y, color=WHITE):
 
 def load_images():
     try:
-        # Load and scale images
+        # Load and scale images with INCREASED sizes
+        # 1.png -> Player 1 (was 50x40, now 80x60)
         img_p1 = pygame.image.load("1.png")
         img_p1 = pygame.transform.scale(img_p1, (80, 60))
         
+        # 2.png -> Player 2 (was 50x40, now 80x60)
         img_p2 = pygame.image.load("2.png")
         img_p2 = pygame.transform.scale(img_p2, (80, 60))
         
+        # meteorit.png -> Meteor (was 30x30, now 60x60)
         img_meteor = pygame.image.load("meteorit.png")
         img_meteor = pygame.transform.scale(img_meteor, (60, 60))
         
         return img_p1, img_p2, img_meteor
     except pygame.error as e:
         print(f"Warning: Could not load images ({e}). Using shapes instead.")
+        # Fallback surfaces
         s1 = pygame.Surface((80, 60)); s1.fill(GREEN)
         s2 = pygame.Surface((80, 60)); s2.fill(BLUE)
         sm = pygame.Surface((60, 60)); sm.fill(BROWN)
@@ -50,14 +52,7 @@ def load_images():
 
 def main():
     pygame.init()
-    
-    # Set Fullscreen
-    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-    # Get actual screen dimensions
-    info = pygame.display.Info()
-    SCREEN_WIDTH = info.current_w
-    SCREEN_HEIGHT = info.current_h
-    
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Space Mission Simulator - Multiplayer")
     clock = pygame.time.Clock()
 
@@ -72,7 +67,7 @@ def main():
     bullets = []
     meteors = []
     mission = Mission()
-    stars = [[random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT)] for _ in range(150)] # More stars for bigger screen
+    stars = [[random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT)] for _ in range(100)]
 
     def reset_game(game_mode):
         nonlocal ships, bullets, meteors, mission
@@ -132,9 +127,6 @@ def main():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
                         state = GameState.MENU
-                    elif event.key == pygame.K_q: # Allow quit from game over
-                        pygame.quit()
-                        sys.exit()
 
         # --- Drawing & Logic ---
         screen.fill(BLACK)
@@ -147,11 +139,11 @@ def main():
             pygame.draw.circle(screen, WHITE, star, 1)
 
         if state == GameState.MENU:
-            draw_text(screen, "SPACE MISSION", 80, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4)
-            draw_text(screen, "1. Single Player", 48, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50)
-            draw_text(screen, "2. Two Players", 48, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 20)
-            draw_text(screen, "Q. Quit", 48, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 90)
-            draw_text(screen, "P1: A/D + W | P2: Arrows + UP", 32, SCREEN_WIDTH // 2, SCREEN_HEIGHT - 100)
+            draw_text(screen, "SPACE MISSION", 64, SCREEN_WIDTH // 2, 100)
+            draw_text(screen, "1. Single Player", 32, SCREEN_WIDTH // 2, 250)
+            draw_text(screen, "2. Two Players", 32, SCREEN_WIDTH // 2, 300)
+            draw_text(screen, "Q. Quit", 32, SCREEN_WIDTH // 2, 350)
+            draw_text(screen, "P1: A/D + W | P2: Arrows + UP", 24, SCREEN_WIDTH // 2, 500)
 
         elif state == GameState.PLAYING:
             active_ships = [s for s in ships if s.hull > 0]
@@ -169,9 +161,8 @@ def main():
                     bullets.remove(bullet)
 
             meteor_timer += 1
-            # Adjust difficulty slightly for bigger screen
-            if meteor_timer > 20: 
-                meteors.append(Meteor(SCREEN_WIDTH, img_meteor_base)) 
+            if meteor_timer > 30:
+                meteors.append(Meteor(SCREEN_WIDTH, img_meteor_base)) # Pass image
                 meteor_timer = 0
             
             for meteor in meteors[:]:
@@ -196,22 +187,18 @@ def main():
                                 bullet.owner.fuel = 100
                         break
 
-            draw_text(screen, f"Score: {mission.score}", 40, SCREEN_WIDTH // 2, 20)
-            draw_text(screen, "ESC: Menu", 24, SCREEN_WIDTH // 2, 60)
-            
-            # P1 Stats (Left)
-            draw_text(screen, f"P1 Hull: {int(ships[0].hull)}%", 24, 80, 20)
-            draw_text(screen, f"P1 Fuel: {int(ships[0].fuel)}%", 24, 80, 45, ORANGE)
-            
-            # P2 Stats (Right)
+            draw_text(screen, f"Score: {mission.score}", 30, SCREEN_WIDTH // 2, 10)
+            draw_text(screen, "ESC: Menu", 20, SCREEN_WIDTH // 2, 40)
+            draw_text(screen, f"P1 Hull: {int(ships[0].hull)}%", 20, 70, 20)
+            draw_text(screen, f"P1 Fuel: {int(ships[0].fuel)}%", 20, 70, 40, ORANGE)
             if mode == "MULTI" and len(ships) > 1:
-                draw_text(screen, f"P2 Hull: {int(ships[1].hull)}%", 24, SCREEN_WIDTH - 80, 20)
-                draw_text(screen, f"P2 Fuel: {int(ships[1].fuel)}%", 24, SCREEN_WIDTH - 80, 45, ORANGE)
+                draw_text(screen, f"P2 Hull: {int(ships[1].hull)}%", 20, SCREEN_WIDTH - 70, 20)
+                draw_text(screen, f"P2 Fuel: {int(ships[1].fuel)}%", 20, SCREEN_WIDTH - 70, 40, ORANGE)
 
         elif state == GameState.GAMEOVER:
-            draw_text(screen, "GAME OVER", 80, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 3)
-            draw_text(screen, f"Score: {mission.score}", 48, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
-            draw_text(screen, "Press R to Restart or Q to Quit", 32, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100)
+            draw_text(screen, "GAME OVER", 64, SCREEN_WIDTH // 2, 200)
+            draw_text(screen, f"Score: {mission.score}", 32, SCREEN_WIDTH // 2, 300)
+            draw_text(screen, "Press R to Restart", 24, SCREEN_WIDTH // 2, 400)
 
         pygame.display.flip()
 
