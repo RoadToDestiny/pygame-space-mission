@@ -29,16 +29,16 @@ def draw_text(surface, text, size, x, y, color=WHITE):
 def load_images():
     try:
         # Load and scale images
-        # 1.jpg -> Player 1 (Green equivalent)
-        img_p1 = pygame.image.load("1.jpg")
+        # 1.png -> Player 1 (Green equivalent)
+        img_p1 = pygame.image.load("1.png")
         img_p1 = pygame.transform.scale(img_p1, (50, 40))
         
-        # 2.jpg -> Player 2 (Blue equivalent)
-        img_p2 = pygame.image.load("2.jpg")
+        # 2.png -> Player 2 (Blue equivalent)
+        img_p2 = pygame.image.load("2.png")
         img_p2 = pygame.transform.scale(img_p2, (50, 40))
         
-        # meteorit.jpg -> Meteor
-        img_meteor = pygame.image.load("meteorit.jpg")
+        # meteorit.png -> Meteor
+        img_meteor = pygame.image.load("meteorit.png")
         img_meteor = pygame.transform.scale(img_meteor, (30, 30))
         
         return img_p1, img_p2, img_meteor
