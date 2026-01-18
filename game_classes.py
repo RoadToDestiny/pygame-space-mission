@@ -9,15 +9,17 @@ class CrewMember:
         self.skills = {"piloting": 10, "engineering": 10}
 
 class SpaceShip:
-    def __init__(self, screen_width, screen_height, image_surface, start_x, controls):
+    def __init__(self, screen_width, screen_height, image_surface, start_x, controls, label):
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.image = image_surface
         self.rect = self.image.get_rect()
         self.rect.centerx = start_x
-        self.rect.bottom = screen_height - 10
+        self.rect.bottom = screen_height - 30 # Moved up slightly for label space
         self.speed = 5
         self.controls = controls 
+        self.label = label
+        self.font = pygame.font.Font(None, 24)
         
         # Simulator attributes
         self.fuel = 100.0
@@ -44,10 +46,26 @@ class SpaceShip:
     def draw(self, surface):
         if self.hull > 0:
             surface.blit(self.image, self.rect)
-            # Draw Hull bar (Red)
-            pygame.draw.rect(surface, (255, 0, 0), (self.rect.x, self.rect.y - 10, 50 * (self.hull/100), 4))
-            # Draw Fuel bar (Yellow) below hull
-            pygame.draw.rect(surface, (255, 165, 0), (self.rect.x, self.rect.y - 5, 50 * (self.fuel/100), 4))
+            
+            # Bar configuration
+            bar_max_width = 80 # Match the ship width (80px)
+            bar_height = 5
+            
+            # Calculate centered X position for bars
+            # self.rect.centerx is the center of the ship
+            # Start drawing from center - half_width
+            bar_x = self.rect.centerx - (bar_max_width // 2)
+            
+            # Draw Hull bar (Red) - Top bar
+            pygame.draw.rect(surface, (255, 0, 0), (bar_x, self.rect.y - 15, bar_max_width * (self.hull/100), bar_height))
+            
+            # Draw Fuel bar (Orange) - Bottom bar
+            pygame.draw.rect(surface, (255, 165, 0), (bar_x, self.rect.y - 8, bar_max_width * (self.fuel/100), bar_height))
+            
+            # Draw Player Label (P1/P2) below the ship
+            text_surf = self.font.render(self.label, True, (255, 255, 255))
+            text_rect = text_surf.get_rect(midtop=(self.rect.centerx, self.rect.bottom + 5))
+            surface.blit(text_surf, text_rect)
 
 class Bullet:
     def __init__(self, x, y, owner):
@@ -69,8 +87,8 @@ class Meteor:
     def __init__(self, screen_width, image_surface):
         self.image = image_surface
         self.rect = self.image.get_rect()
-        self.rect.x = random.randint(0, screen_width - 30)
-        self.rect.y = -30
+        self.rect.x = random.randint(0, screen_width - 60)
+        self.rect.y = -60
         self.speed = random.randint(2, 6)
 
     def update(self):

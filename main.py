@@ -78,12 +78,12 @@ def main():
         
         # Player 1 (A/D movement, W to shoot)
         p1_controls = {'left': pygame.K_a, 'right': pygame.K_d, 'fire': pygame.K_w}
-        ships.append(SpaceShip(SCREEN_WIDTH, SCREEN_HEIGHT, img_p1, SCREEN_WIDTH // 3, p1_controls))
+        ships.append(SpaceShip(SCREEN_WIDTH, SCREEN_HEIGHT, img_p1, SCREEN_WIDTH // 3, p1_controls, "P1"))
         
         if game_mode == "MULTI":
             # Player 2 (Arrows movement, UP Arrow to shoot)
             p2_controls = {'left': pygame.K_LEFT, 'right': pygame.K_RIGHT, 'fire': pygame.K_UP}
-            ships.append(SpaceShip(SCREEN_WIDTH, SCREEN_HEIGHT, img_p2, 2 * SCREEN_WIDTH // 3, p2_controls))
+            ships.append(SpaceShip(SCREEN_WIDTH, SCREEN_HEIGHT, img_p2, 2 * SCREEN_WIDTH // 3, p2_controls, "P2"))
         else:
             ships[0].rect.centerx = SCREEN_WIDTH // 2
 
@@ -119,10 +119,8 @@ def main():
                     
                     for ship in ships:
                         if ship.hull > 0 and event.key == ship.controls['fire']:
-                            # DUAL CANNONS: Fire two bullets from the sides
-                            # Left cannon (offset +15 from left edge)
+                            # DUAL CANNONS
                             bullets.append(Bullet(ship.rect.left + 15, ship.rect.top + 20, ship))
-                            # Right cannon (offset -15 from right edge)
                             bullets.append(Bullet(ship.rect.right - 15, ship.rect.top + 20, ship))
                                 
             elif state == GameState.GAMEOVER:
