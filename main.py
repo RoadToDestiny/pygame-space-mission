@@ -28,26 +28,26 @@ def draw_text(surface, text, size, x, y, color=WHITE):
 
 def load_images():
     try:
-        # Load and scale images
-        # 1.png -> Player 1 (Green equivalent)
+        # Load and scale images with INCREASED sizes
+        # 1.png -> Player 1 (was 50x40, now 80x60)
         img_p1 = pygame.image.load("1.png")
-        img_p1 = pygame.transform.scale(img_p1, (50, 40))
+        img_p1 = pygame.transform.scale(img_p1, (80, 60))
         
-        # 2.png -> Player 2 (Blue equivalent)
+        # 2.png -> Player 2 (was 50x40, now 80x60)
         img_p2 = pygame.image.load("2.png")
-        img_p2 = pygame.transform.scale(img_p2, (50, 40))
+        img_p2 = pygame.transform.scale(img_p2, (80, 60))
         
-        # meteorit.png -> Meteor
+        # meteorit.png -> Meteor (was 30x30, now 60x60)
         img_meteor = pygame.image.load("meteorit.png")
-        img_meteor = pygame.transform.scale(img_meteor, (30, 30))
+        img_meteor = pygame.transform.scale(img_meteor, (60, 60))
         
         return img_p1, img_p2, img_meteor
     except pygame.error as e:
         print(f"Warning: Could not load images ({e}). Using shapes instead.")
         # Fallback surfaces
-        s1 = pygame.Surface((50, 40)); s1.fill(GREEN)
-        s2 = pygame.Surface((50, 40)); s2.fill(BLUE)
-        sm = pygame.Surface((30, 30)); sm.fill(BROWN)
+        s1 = pygame.Surface((80, 60)); s1.fill(GREEN)
+        s2 = pygame.Surface((80, 60)); s2.fill(BLUE)
+        sm = pygame.Surface((60, 60)); sm.fill(BROWN)
         return s1, s2, sm
 
 def main():
@@ -119,7 +119,11 @@ def main():
                     
                     for ship in ships:
                         if ship.hull > 0 and event.key == ship.controls['fire']:
-                            bullets.append(Bullet(ship.rect.centerx, ship.rect.top, ship))
+                            # DUAL CANNONS: Fire two bullets from the sides
+                            # Left cannon (offset +15 from left edge)
+                            bullets.append(Bullet(ship.rect.left + 15, ship.rect.top + 20, ship))
+                            # Right cannon (offset -15 from right edge)
+                            bullets.append(Bullet(ship.rect.right - 15, ship.rect.top + 20, ship))
                                 
             elif state == GameState.GAMEOVER:
                 if event.type == pygame.KEYDOWN:
