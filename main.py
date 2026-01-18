@@ -12,6 +12,7 @@ BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 ORANGE = (255, 165, 0)
+BROWN = (139, 69, 19)
 
 class GameState:
     MENU = 0
@@ -25,11 +26,38 @@ def draw_text(surface, text, size, x, y, color=WHITE):
     rect.midtop = (x, y)
     surface.blit(text_surface, rect)
 
+def load_images():
+    try:
+        # Load and scale images
+        # 1.jpg -> Player 1 (Green equivalent)
+        img_p1 = pygame.image.load("1.jpg")
+        img_p1 = pygame.transform.scale(img_p1, (50, 40))
+        
+        # 2.jpg -> Player 2 (Blue equivalent)
+        img_p2 = pygame.image.load("2.jpg")
+        img_p2 = pygame.transform.scale(img_p2, (50, 40))
+        
+        # meteorit.jpg -> Meteor
+        img_meteor = pygame.image.load("meteorit.jpg")
+        img_meteor = pygame.transform.scale(img_meteor, (30, 30))
+        
+        return img_p1, img_p2, img_meteor
+    except pygame.error as e:
+        print(f"Warning: Could not load images ({e}). Using shapes instead.")
+        # Fallback surfaces
+        s1 = pygame.Surface((50, 40)); s1.fill(GREEN)
+        s2 = pygame.Surface((50, 40)); s2.fill(BLUE)
+        sm = pygame.Surface((30, 30)); sm.fill(BROWN)
+        return s1, s2, sm
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Space Mission Simulator - Multiplayer")
     clock = pygame.time.Clock()
+
+    # Load resources
+    img_p1, img_p2, img_meteor_base = load_images()
 
     state = GameState.MENU
     mode = "SINGLE" 
@@ -50,12 +78,12 @@ def main():
         
         # Player 1 (A/D movement, W to shoot)
         p1_controls = {'left': pygame.K_a, 'right': pygame.K_d, 'fire': pygame.K_w}
-        ships.append(SpaceShip(SCREEN_WIDTH, SCREEN_HEIGHT, GREEN, SCREEN_WIDTH // 3, p1_controls))
+        ships.append(SpaceShip(SCREEN_WIDTH, SCREEN_HEIGHT, img_p1, SCREEN_WIDTH // 3, p1_controls))
         
         if game_mode == "MULTI":
             # Player 2 (Arrows movement, UP Arrow to shoot)
             p2_controls = {'left': pygame.K_LEFT, 'right': pygame.K_RIGHT, 'fire': pygame.K_UP}
-            ships.append(SpaceShip(SCREEN_WIDTH, SCREEN_HEIGHT, BLUE, 2 * SCREEN_WIDTH // 3, p2_controls))
+            ships.append(SpaceShip(SCREEN_WIDTH, SCREEN_HEIGHT, img_p2, 2 * SCREEN_WIDTH // 3, p2_controls))
         else:
             ships[0].rect.centerx = SCREEN_WIDTH // 2
 
@@ -86,13 +114,11 @@ def main():
 
             elif state == GameState.PLAYING:
                 if event.type == pygame.KEYDOWN:
-                    # Escape to return to menu
                     if event.key == pygame.K_ESCAPE:
                         state = GameState.MENU
                     
                     for ship in ships:
                         if ship.hull > 0 and event.key == ship.controls['fire']:
-                            # Pass 'ship' as owner
                             bullets.append(Bullet(ship.rect.centerx, ship.rect.top, ship))
                                 
             elif state == GameState.GAMEOVER:
@@ -103,7 +129,6 @@ def main():
         # --- Drawing & Logic ---
         screen.fill(BLACK)
         
-        # Background Stars
         for star in stars:
             star[1] += 2
             if star[1] > SCREEN_HEIGHT:
@@ -116,7 +141,6 @@ def main():
             draw_text(screen, "1. Single Player", 32, SCREEN_WIDTH // 2, 250)
             draw_text(screen, "2. Two Players", 32, SCREEN_WIDTH // 2, 300)
             draw_text(screen, "Q. Quit", 32, SCREEN_WIDTH // 2, 350)
-            
             draw_text(screen, "P1: A/D + W | P2: Arrows + UP", 24, SCREEN_WIDTH // 2, 500)
 
         elif state == GameState.PLAYING:
@@ -128,17 +152,15 @@ def main():
                 ship.update(keys)
                 ship.draw(screen)
 
-            # Update Bullets
             for bullet in bullets[:]:
                 bullet.update()
                 bullet.draw(screen)
                 if bullet.rect.bottom < 0:
                     bullets.remove(bullet)
 
-            # Update Meteors
             meteor_timer += 1
             if meteor_timer > 30:
-                meteors.append(Meteor(SCREEN_WIDTH))
+                meteors.append(Meteor(SCREEN_WIDTH, img_meteor_base)) # Pass image
                 meteor_timer = 0
             
             for meteor in meteors[:]:
@@ -147,35 +169,26 @@ def main():
                 if meteor.rect.top > SCREEN_HEIGHT:
                     meteors.remove(meteor)
                 
-                # Collisions Ship vs Meteor
                 for ship in active_ships:
                     if meteor.rect.colliderect(ship.rect):
                         ship.hull -= 20
                         if meteor in meteors: meteors.remove(meteor)
                 
-                # Collisions Bullet vs Meteor
                 for bullet in bullets[:]:
                     if meteor in meteors and bullet.rect.colliderect(meteor.rect):
                         bullets.remove(bullet)
                         meteors.remove(meteor)
                         mission.score += 10
-                        
-                        # Reward fuel to the shooter
                         if bullet.owner and bullet.owner in ships:
                             bullet.owner.fuel += 15
                             if bullet.owner.fuel > 100:
                                 bullet.owner.fuel = 100
                         break
 
-            # UI HUD
             draw_text(screen, f"Score: {mission.score}", 30, SCREEN_WIDTH // 2, 10)
             draw_text(screen, "ESC: Menu", 20, SCREEN_WIDTH // 2, 40)
-            
-            # P1 Stats (Left)
             draw_text(screen, f"P1 Hull: {int(ships[0].hull)}%", 20, 70, 20)
             draw_text(screen, f"P1 Fuel: {int(ships[0].fuel)}%", 20, 70, 40, ORANGE)
-            
-            # P2 Stats (Right)
             if mode == "MULTI" and len(ships) > 1:
                 draw_text(screen, f"P2 Hull: {int(ships[1].hull)}%", 20, SCREEN_WIDTH - 70, 20)
                 draw_text(screen, f"P2 Fuel: {int(ships[1].fuel)}%", 20, SCREEN_WIDTH - 70, 40, ORANGE)

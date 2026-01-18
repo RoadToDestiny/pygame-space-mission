@@ -9,17 +9,15 @@ class CrewMember:
         self.skills = {"piloting": 10, "engineering": 10}
 
 class SpaceShip:
-    def __init__(self, screen_width, screen_height, color, start_x, controls):
+    def __init__(self, screen_width, screen_height, image_surface, start_x, controls):
         self.screen_width = screen_width
         self.screen_height = screen_height
-        self.image = pygame.Surface((50, 40))
-        self.image.fill(color)
+        self.image = image_surface
         self.rect = self.image.get_rect()
         self.rect.centerx = start_x
         self.rect.bottom = screen_height - 10
         self.speed = 5
         self.controls = controls 
-        self.color = color
         
         # Simulator attributes
         self.fuel = 100.0
@@ -45,7 +43,7 @@ class SpaceShip:
         
     def draw(self, surface):
         if self.hull > 0:
-            pygame.draw.rect(surface, self.color, self.rect)
+            surface.blit(self.image, self.rect)
             # Draw Hull bar (Red)
             pygame.draw.rect(surface, (255, 0, 0), (self.rect.x, self.rect.y - 10, 50 * (self.hull/100), 4))
             # Draw Fuel bar (Yellow) below hull
@@ -59,7 +57,7 @@ class Bullet:
         self.rect.centerx = x
         self.rect.bottom = y
         self.speed = -7
-        self.owner = owner # Track which ship fired this bullet
+        self.owner = owner 
 
     def update(self):
         self.rect.y += self.speed
@@ -68,9 +66,8 @@ class Bullet:
         pygame.draw.rect(surface, (255, 255, 0), self.rect)
 
 class Meteor:
-    def __init__(self, screen_width):
-        self.image = pygame.Surface((30, 30))
-        self.image.fill((139, 69, 19)) # Brown
+    def __init__(self, screen_width, image_surface):
+        self.image = image_surface
         self.rect = self.image.get_rect()
         self.rect.x = random.randint(0, screen_width - 30)
         self.rect.y = -30
@@ -80,7 +77,7 @@ class Meteor:
         self.rect.y += self.speed
 
     def draw(self, surface):
-        pygame.draw.rect(surface, (139, 69, 19), self.rect)
+        surface.blit(self.image, self.rect)
 
 class Mission:
     def __init__(self):
