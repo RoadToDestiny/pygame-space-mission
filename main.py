@@ -11,6 +11,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
+ORANGE = (255, 165, 0)
 
 class GameState:
     MENU = 0
@@ -56,7 +57,6 @@ def main():
             p2_controls = {'left': pygame.K_a, 'right': pygame.K_d, 'fire': pygame.K_LSHIFT}
             ships.append(SpaceShip(SCREEN_WIDTH, SCREEN_HEIGHT, BLUE, 2 * SCREEN_WIDTH // 3, p2_controls))
         else:
-            # Center the single ship
             ships[0].rect.centerx = SCREEN_WIDTH // 2
 
     meteor_timer = 0
@@ -109,11 +109,10 @@ def main():
         if state == GameState.MENU:
             draw_text(screen, "SPACE MISSION", 64, SCREEN_WIDTH // 2, 100)
             draw_text(screen, "1. Single Player", 32, SCREEN_WIDTH // 2, 250)
-            draw_text(screen, "2. Two Players (Multiplayer)", 32, SCREEN_WIDTH // 2, 300)
+            draw_text(screen, "2. Two Players", 32, SCREEN_WIDTH // 2, 300)
             draw_text(screen, "Q. Quit", 32, SCREEN_WIDTH // 2, 350)
             
-            draw_text(screen, "P1 Controls: Arrows + Space", 20, SCREEN_WIDTH // 2, 500)
-            draw_text(screen, "P2 Controls: A/D + Left Shift", 20, SCREEN_WIDTH // 2, 530)
+            draw_text(screen, "P1: Arrows + Space | P2: A/D + L-Shift", 24, SCREEN_WIDTH // 2, 500)
 
         elif state == GameState.PLAYING:
             active_ships = [s for s in ships if s.hull > 0]
@@ -143,13 +142,12 @@ def main():
                 if meteor.rect.top > SCREEN_HEIGHT:
                     meteors.remove(meteor)
                 
-                # Collisions with ships
+                # Collisions
                 for ship in active_ships:
                     if meteor.rect.colliderect(ship.rect):
                         ship.hull -= 20
                         if meteor in meteors: meteors.remove(meteor)
                 
-                # Collisions with bullets
                 for bullet in bullets[:]:
                     if meteor in meteors and bullet.rect.colliderect(meteor.rect):
                         bullets.remove(bullet)
@@ -158,15 +156,21 @@ def main():
                         break
 
             # UI HUD
-            draw_text(screen, f"Score: {mission.score}", 30, 70, 10)
-            draw_text(screen, f"P1 Hull: {int(ships[0].hull)}%", 20, 60, 40)
+            draw_text(screen, f"Score: {mission.score}", 30, SCREEN_WIDTH // 2, 10)
+            
+            # P1 Stats (Left)
+            draw_text(screen, f"P1 Hull: {int(ships[0].hull)}%", 20, 70, 20)
+            draw_text(screen, f"P1 Fuel: {int(ships[0].fuel)}%", 20, 70, 40, ORANGE)
+            
+            # P2 Stats (Right)
             if mode == "MULTI" and len(ships) > 1:
-                draw_text(screen, f"P2 Hull: {int(ships[1].hull)}%", 20, SCREEN_WIDTH - 80, 40)
+                draw_text(screen, f"P2 Hull: {int(ships[1].hull)}%", 20, SCREEN_WIDTH - 70, 20)
+                draw_text(screen, f"P2 Fuel: {int(ships[1].fuel)}%", 20, SCREEN_WIDTH - 70, 40, ORANGE)
 
         elif state == GameState.GAMEOVER:
             draw_text(screen, "GAME OVER", 64, SCREEN_WIDTH // 2, 200)
-            draw_text(screen, f"Final Score: {mission.score}", 32, SCREEN_WIDTH // 2, 300)
-            draw_text(screen, "Press R to Menu", 24, SCREEN_WIDTH // 2, 400)
+            draw_text(screen, f"Score: {mission.score}", 32, SCREEN_WIDTH // 2, 300)
+            draw_text(screen, "Press R to Restart", 24, SCREEN_WIDTH // 2, 400)
 
         pygame.display.flip()
 

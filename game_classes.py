@@ -18,7 +18,7 @@ class SpaceShip:
         self.rect.centerx = start_x
         self.rect.bottom = screen_height - 10
         self.speed = 5
-        self.controls = controls # Expected dict: {'left': K_LEFT, 'right': K_RIGHT, 'fire': K_SPACE}
+        self.controls = controls 
         self.color = color
         
         # Simulator attributes
@@ -28,19 +28,28 @@ class SpaceShip:
         self.crew = [CrewMember("Alice", "Pilot"), CrewMember("Bob", "Engineer")]
 
     def update(self, keys_pressed):
+        # Check fuel and hull before allowing movement
         if self.fuel > 0 and self.hull > 0:
+            moved = False
             if keys_pressed[self.controls['left']] and self.rect.left > 0:
                 self.rect.x -= self.speed
-                self.fuel -= 0.05
+                self.fuel -= 0.1 # Consume fuel
+                moved = True
             if keys_pressed[self.controls['right']] and self.rect.right < self.screen_width:
                 self.rect.x += self.speed
-                self.fuel -= 0.05
+                self.fuel -= 0.1 # Consume fuel
+                moved = True
+            
+            # Ensure fuel doesn't go below 0
+            if self.fuel < 0: self.fuel = 0
         
     def draw(self, surface):
         if self.hull > 0:
             pygame.draw.rect(surface, self.color, self.rect)
-            # Draw HUD bar for hull above ship
-            pygame.draw.rect(surface, (255, 0, 0), (self.rect.x, self.rect.y - 10, 50 * (self.hull/100), 5))
+            # Draw Hull bar (Red)
+            pygame.draw.rect(surface, (255, 0, 0), (self.rect.x, self.rect.y - 10, 50 * (self.hull/100), 4))
+            # Draw Fuel bar (Yellow) below hull
+            pygame.draw.rect(surface, (255, 165, 0), (self.rect.x, self.rect.y - 5, 50 * (self.fuel/100), 4))
 
 class Bullet:
     def __init__(self, x, y):
